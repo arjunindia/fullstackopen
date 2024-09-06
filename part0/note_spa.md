@@ -25,10 +25,3 @@ sequenceDiagram
     server-->>browser: ` [{ "content": payload, "date": "2024-06-09" }, ... ]`
     deactivate server
     Note right of browser: The browser executes the callback function that renders the notes
-
-    Note right of browser: The user enters data and clicks save
-    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa with payload
-    activate server
-    server-->>browser: {"message":"note created"}
-    deactivate server
-    Note right of browser: SPA adds the entered message to the list of notes
