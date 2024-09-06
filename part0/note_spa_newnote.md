@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     participant browser
     participant server
@@ -8,3 +9,4 @@ sequenceDiagram
     server-->>browser: {"message":"note created"}
     deactivate server
     Note right of browser: SPA adds the entered message to the list of notes
+```
