@@ -13,9 +13,10 @@ const FeedbackButton = ({ name, setCount }) => {
 };
 const StatisticLine = ({ name, count }) => {
   return (
-    <p>
-      {name}: {count}
-    </p>
+    <tr>
+      <td>{name}</td>
+      <td>{count}</td>
+    </tr>
   );
 };
 const Statistics = ({ good, neutral, bad }) => {
@@ -23,13 +24,15 @@ const Statistics = ({ good, neutral, bad }) => {
   let positive = (good * 100) / total;
   if (total === 0) return <p>no feedback given</p>;
   return (
-    <>
-      <StatisticLine name="good" count={good} />
-      <StatisticLine name="neutral" count={neutral} />
-      <StatisticLine name="bad" count={bad} />
-      <StatisticLine name="total" count={total} />
-      <StatisticLine name="positive" count={positive + "%"} />
-    </>
+    <table>
+      <tbody>
+        <StatisticLine name="good" count={good} />
+        <StatisticLine name="neutral" count={neutral} />
+        <StatisticLine name="bad" count={bad} />
+        <StatisticLine name="total" count={total} />
+        <StatisticLine name="positive" count={positive + "%"} />
+      </tbody>
+    </table>
   );
 };
 
