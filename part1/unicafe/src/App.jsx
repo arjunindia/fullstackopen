@@ -1,18 +1,34 @@
 import { useState } from "react";
 
+const FeedbackButton = ({ name, setCount }) => {
+  return (
+    <button
+      onClick={() => {
+        setCount((count) => count + 1);
+      }}
+    >
+      {name}
+    </button>
+  );
+};
+const StatisticLine = ({ name, count }) => {
+  return (
+    <p>
+      {name}: {count}
+    </p>
+  );
+};
 const Statistics = ({ good, neutral, bad }) => {
   let total = good + neutral + bad;
-  let average = (good + neutral + bad) / 3;
   let positive = (good * 100) / total;
   if (total === 0) return <p>no feedback given</p>;
   return (
     <>
-      <p>good: {good}</p>
-      <p>neutral: {neutral}</p>
-      <p>bad: {bad}</p>
-      <p>all: {total}</p>
-      <p>average: {average}</p>
-      <p>positive: {positive}%</p>
+      <StatisticLine name="good" count={good} />
+      <StatisticLine name="neutral" count={neutral} />
+      <StatisticLine name="bad" count={bad} />
+      <StatisticLine name="total" count={total} />
+      <StatisticLine name="positive" count={positive + "%"} />
     </>
   );
 };
@@ -26,9 +42,9 @@ const App = () => {
   return (
     <div>
       <h1>give feedback</h1>
-      <button onClick={() => setGood(good + 1)}>good</button>
-      <button onClick={() => setNeutral(neutral + 1)}>neutral</button>
-      <button onClick={() => setBad(bad + 1)}>bad</button>
+      <FeedbackButton name="good" setCount={setGood} />
+      <FeedbackButton name="neutral" setCount={setNeutral} />
+      <FeedbackButton name="bad" setCount={setBad} />
       <h2>statistics</h2>
       <Statistics good={good} neutral={neutral} bad={bad} />
     </div>
