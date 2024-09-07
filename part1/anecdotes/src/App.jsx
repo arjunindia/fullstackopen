@@ -11,6 +11,17 @@ const RandomizeButton = ({ setSelected, length }) => {
     </button>
   );
 };
+const VoteButton = ({ setVotes, selected }) => {
+  return (
+    <button
+      onClick={() => {
+        setVotes((votes) => votes.map((v, i) => (i === selected ? v + 1 : v)));
+      }}
+    >
+      vote
+    </button>
+  );
+};
 const App = () => {
   const anecdotes = [
     "If it hurts, do it more often.",
@@ -22,13 +33,26 @@ const App = () => {
     "Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.",
     "The only way to go fast, is to go well.",
   ];
-
+  const [votes, setVotes] = useState(Array(anecdotes.length).fill(0));
   const [selected, setSelected] = useState(0);
+
+  let largestIdx = 0;
+  for (let i = 0; i < votes.length; i++) {
+    if (votes[i] > votes[largestIdx]) {
+      largestIdx = i;
+    }
+  }
 
   return (
     <div>
+      <h1>Anecdote of the day</h1>
       <p>{anecdotes[selected]}</p>
+      <p>has {votes[selected]} votes</p>
+      <VoteButton setVotes={setVotes} selected={selected} />
       <RandomizeButton setSelected={setSelected} length={anecdotes.length} />
+      <h2>Anecdote with the most number of votes</h2>
+      <p>{anecdotes[largestIdx]}</p>
+      <p>has {votes[largestIdx]} votes</p>
     </div>
   );
 };
