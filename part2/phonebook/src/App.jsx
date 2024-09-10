@@ -1,5 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+
+const Notification = ({ message }) => {
+  if (message === null) {
+    return null;
+  }
+
+  return <div className="error">{message}</div>;
+};
+
 const Filter = ({ search, setSearch }) => {
   return (
     <p>
@@ -16,6 +25,7 @@ const PersonForm = ({
   setNewName,
   newPhone,
   setNewPhone,
+  notify,
 }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -39,7 +49,8 @@ const PersonForm = ({
               console.log(persons);
               return [...persons];
             });
-          });
+          })
+          .catch(notify(`Error: could not update contact`));
       }
       return;
     }
@@ -48,9 +59,12 @@ const PersonForm = ({
       number: newPhone,
       id: persons.length + 1,
     };
-    axios.post("http://localhost:3001/persons", newPerson).then((res) => {
-      setPersons((persons) => [...persons, res.data]);
-    });
+    axios
+      .post("http://localhost:3001/persons", newPerson)
+      .then((res) => {
+        setPersons((persons) => [...persons, res.data]);
+      })
+      .catch(notify(`Could not update server!`));
     setNewName("");
     setNewPhone("");
   };
@@ -82,7 +96,7 @@ const PersonForm = ({
   );
 };
 
-const Persons = ({ persons, setPersons }) => {
+const Persons = ({ persons, setPersons, notify }) => {
   return (
     <table>
       {persons.map((person) => (
@@ -101,7 +115,8 @@ const Persons = ({ persons, setPersons }) => {
                         setPersons((persons) =>
                           persons.filter((person) => person.id !== res.data.id),
                         );
-                      });
+                      })
+                      .catch(() => notify(`Unable to delete!`));
                   }
                 }}
               >
@@ -122,19 +137,30 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
 
+  const [errorMessage, setErrorMessage] = useState(null);
+
   const filteredPersons = persons.filter((person) =>
     person.name.includes(search),
   );
-
+  const notify = (message) => {
+    setErrorMessage(message);
+    setTimeout(() => {
+      setErrorMessage(null);
+    }, 5000);
+  };
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((res) => {
-      setPersons(res.data);
-    });
+    axios
+      .get("http://localhost:3001/persons")
+      .then((res) => {
+        setPersons(res.data);
+      })
+      .catch(() => notify(`Cannot get to server!`));
   }, []);
 
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={errorMessage} />
       <Filter search={search} setSearch={setSearch} />
       <h2>Add new</h2>
       <PersonForm
@@ -144,9 +170,14 @@ const App = () => {
         setNewName={setNewName}
         newPhone={newPhone}
         setNewPhone={setNewPhone}
+        notify={notify}
       />
       <h2>Numbers</h2>
-      <Persons persons={filteredPersons} setPersons={setPersons} />
+      <Persons
+        persons={filteredPersons}
+        setPersons={setPersons}
+        notify={notify}
+      />
     </div>
   );
 };
