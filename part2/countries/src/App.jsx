@@ -2,6 +2,23 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const CountryView = ({ country }) => {
+  const [temperature, setTemperature] = useState("");
+  const [wind, setWind] = useState("");
+  useEffect(() => {
+    console.log(country.latlng);
+    axios
+      .get(
+        `https://api.open-meteo.com/v1/forecast?latitude=${country.latlng[0]}&longitude=${country.latlng[1]}&current=temperature_2m,wind_speed_10m`,
+      )
+      .then((res) => {
+        setTemperature(
+          `${res.data.current.temperature_2m}${res.data.current_units.temperature_2m}`,
+        );
+        setWind(
+          `${res.data.current.wind_speed_10m}${res.data.current_units.wind_speed_10m}`,
+        );
+      });
+  }, []);
   return (
     <div>
       <h1>{country.name.common}</h1>
@@ -19,6 +36,9 @@ const CountryView = ({ country }) => {
         ))}
       </ul>
       <img src={country.flags.png} />
+      <h2>Weather in {country.name.common}</h2>
+      <p>Temperature: {temperature}</p>
+      <p>Wind: {wind}</p>
     </div>
   );
 };
