@@ -20,7 +20,27 @@ const PersonForm = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (persons.some((person) => person.name === newName)) {
-      alert(`${newName} is already in the phonebook!`);
+      if (
+        window.confirm(
+          `${newName} is already in the phonebook! Do you want to update the contact with the new number?`,
+        )
+      ) {
+        const id = persons.filter((person) => person.name === newName)[0].id;
+        axios
+          .put(`http://localhost:3001/persons/${id}`, {
+            name: newName,
+            number: newPhone,
+            id: id,
+          })
+          .then((res) => {
+            setPersons((persons) => {
+              persons.find((person) => person.id === res.data.id).number =
+                res.data.number;
+              console.log(persons);
+              return [...persons];
+            });
+          });
+      }
       return;
     }
     const newPerson = {
