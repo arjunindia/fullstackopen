@@ -1,5 +1,5 @@
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import axios from "axios";
 const Filter = ({ search, setSearch }) => {
   return (
     <p>
@@ -17,22 +17,25 @@ const PersonForm = ({
   newPhone,
   setNewPhone,
 }) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (persons.some((person) => person.name === newName)) {
+      alert(`${newName} is already in the phonebook!`);
+      return;
+    }
+    const newPerson = {
+      name: newName,
+      number: newPhone,
+      id: persons.length + 1,
+    };
+    axios.post("http://localhost:3001/persons", newPerson).then((res) => {
+      setPersons((persons) => [...persons, res.data]);
+    });
+    setNewName("");
+    setNewPhone("");
+  };
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (persons.some((person) => person.name === newName)) {
-          alert(`${newName} is already in the phonebook!`);
-          return;
-        }
-        setPersons((persons) => [
-          ...persons,
-          { name: newName, number: newPhone, id: persons.length },
-        ]);
-        setNewName("");
-        setNewPhone("");
-      }}
-    >
+    <form onSubmit={handleSubmit}>
       <div>
         name:{" "}
         <input
@@ -59,7 +62,7 @@ const PersonForm = ({
   );
 };
 
-const Persons = ({ persons }) => {
+const Persons = ({ persons, setPersons }) => {
   return (
     <table>
       {persons.map((person) => (
@@ -67,6 +70,24 @@ const Persons = ({ persons }) => {
           <tr>
             <td>{person.name}</td>
             <td>{person.number}</td>
+            <td>
+              <button
+                onClick={() => {
+                  if (window.confirm(`Delete ${person.name}?`)) {
+                    axios
+                      .delete(`http://localhost:3001/persons/${person.id}`)
+                      .then((res) => {
+                        console.log(res);
+                        setPersons((persons) =>
+                          persons.filter((person) => person.id !== res.data.id),
+                        );
+                      });
+                  }
+                }}
+              >
+                Delete
+              </button>
+            </td>
           </tr>
         </tbody>
       ))}
@@ -75,12 +96,7 @@ const Persons = ({ persons }) => {
 };
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "040-123456", id: 1 },
-    { name: "Ada Lovelace", number: "39-44-5323523", id: 2 },
-    { name: "Dan Abramov", number: "12-43-234345", id: 3 },
-    { name: "Mary Poppendieck", number: "39-23-6423122", id: 4 },
-  ]);
+  const [persons, setPersons] = useState([]);
 
   const [search, setSearch] = useState("");
   const [newName, setNewName] = useState("");
@@ -89,6 +105,12 @@ const App = () => {
   const filteredPersons = persons.filter((person) =>
     person.name.includes(search),
   );
+
+  useEffect(() => {
+    axios.get("http://localhost:3001/persons").then((res) => {
+      setPersons(res.data);
+    });
+  }, []);
 
   return (
     <div>
@@ -104,7 +126,7 @@ const App = () => {
         setNewPhone={setNewPhone}
       />
       <h2>Numbers</h2>
-      <Persons persons={filteredPersons} />
+      <Persons persons={filteredPersons} setPersons={setPersons} />
     </div>
   );
 };
