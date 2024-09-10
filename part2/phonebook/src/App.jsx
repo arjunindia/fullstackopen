@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const Notification = ({ message }) => {
+const Notification = ({ type, message }) => {
   if (message === null) {
     return null;
   }
 
-  return <div className="error">{message}</div>;
+  return <div className={type}>{message}</div>;
 };
 
 const Filter = ({ search, setSearch }) => {
@@ -43,14 +43,17 @@ const PersonForm = ({
             id: id,
           })
           .then((res) => {
+            notify("info", `Updated ${newName}`);
             setPersons((persons) => {
               persons.find((person) => person.id === res.data.id).number =
                 res.data.number;
               console.log(persons);
+              setNewName("");
+              setNewPhone("");
               return [...persons];
             });
           })
-          .catch(notify(`Error: could not update contact`));
+          .catch(notify("err", `Error: could not update contact`));
       }
       return;
     }
@@ -62,11 +65,12 @@ const PersonForm = ({
     axios
       .post("http://localhost:3001/persons", newPerson)
       .then((res) => {
+        notify("info", `Added ${newName}`);
         setPersons((persons) => [...persons, res.data]);
+        setNewName("");
+        setNewPhone("");
       })
-      .catch(notify(`Could not update server!`));
-    setNewName("");
-    setNewPhone("");
+      .catch(notify("err", `Could not update server!`));
   };
   return (
     <form onSubmit={handleSubmit}>
@@ -111,12 +115,17 @@ const Persons = ({ persons, setPersons, notify }) => {
                     axios
                       .delete(`http://localhost:3001/persons/${person.id}`)
                       .then((res) => {
-                        console.log(res);
+                        notify("info", `Deleted ${person.name}`);
                         setPersons((persons) =>
                           persons.filter((person) => person.id !== res.data.id),
                         );
                       })
-                      .catch(() => notify(`Unable to delete!`));
+                      .catch(() =>
+                        notify(
+                          "err",
+                          `Unable to delete! ${person.name} likely deleted already.`,
+                        ),
+                      );
                   }
                 }}
               >
@@ -137,15 +146,16 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
 
-  const [errorMessage, setErrorMessage] = useState(null);
-
+  const [message, setMessage] = useState(null);
+  const [type, setType] = useState("err");
   const filteredPersons = persons.filter((person) =>
     person.name.includes(search),
   );
-  const notify = (message) => {
-    setErrorMessage(message);
+  const notify = (type, message) => {
+    setMessage(message);
+    setType(type);
     setTimeout(() => {
-      setErrorMessage(null);
+      setMessage(null);
     }, 5000);
   };
   useEffect(() => {
@@ -154,13 +164,13 @@ const App = () => {
       .then((res) => {
         setPersons(res.data);
       })
-      .catch(() => notify(`Cannot get to server!`));
+      .catch(() => notify("err", `Cannot get to server!`));
   }, []);
 
   return (
     <div>
       <h1>Phonebook</h1>
-      <Notification message={errorMessage} />
+      <Notification message={message} type={type} />
       <Filter search={search} setSearch={setSearch} />
       <h2>Add new</h2>
       <PersonForm
