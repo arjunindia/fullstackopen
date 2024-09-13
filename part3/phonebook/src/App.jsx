@@ -37,7 +37,7 @@ const PersonForm = ({
       ) {
         const id = persons.filter((person) => person.name === newName)[0].id;
         axios
-          .put(`http://localhost:3001/api/persons/${id}`, {
+          .put(`/api/persons/${id}`, {
             name: newName,
             number: newPhone,
             id: id,
@@ -63,7 +63,7 @@ const PersonForm = ({
       id: persons.length + 1,
     };
     axios
-      .post("http://localhost:3001/api/persons", newPerson)
+      .post("/api/persons", newPerson)
       .then((res) => {
         notify("info", `Added ${newName}`);
         setPersons((persons) => [...persons, res.data]);
@@ -113,7 +113,7 @@ const Persons = ({ persons, setPersons, notify }) => {
                 onClick={() => {
                   if (window.confirm(`Delete ${person.name}?`)) {
                     axios
-                      .delete(`http://localhost:3001/api/persons/${person.id}`)
+                      .delete(`/api/persons/${person.id}`)
                       .then((res) => {
                         notify("info", `Deleted ${person.name}`);
                         setPersons((persons) =>
@@ -160,7 +160,7 @@ const App = () => {
   };
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/persons")
+      .get("/api/persons")
       .then((res) => {
         setPersons(res.data);
       })
