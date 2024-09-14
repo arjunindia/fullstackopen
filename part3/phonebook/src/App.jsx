@@ -47,20 +47,25 @@ const PersonForm = ({
             setPersons((persons) => {
               persons.find((person) => person.id === res.data.id).number =
                 res.data.number;
-              console.log(persons);
               setNewName("");
               setNewPhone("");
               return [...persons];
             });
           })
-          .catch(notify("err", `Error: could not update contact`));
+          .catch((e) => {
+            if (e.response)
+              notify(
+                "err",
+                `Error: could not update contact` + e.response.data.error,
+              );
+            else notify("err", `Error: could not update contact`);
+          });
       }
       return;
     }
     const newPerson = {
       name: newName,
       number: newPhone,
-      id: persons.length + 1,
     };
     axios
       .post("/api/persons", newPerson)
@@ -70,7 +75,10 @@ const PersonForm = ({
         setNewName("");
         setNewPhone("");
       })
-      .catch(notify("err", `Could not update server!`));
+      .catch((e) => {
+        if (e.response) notify("err", `Error: ` + e.response.data.error);
+        else notify("err", `Error: could not add contact`);
+      });
   };
   return (
     <form onSubmit={handleSubmit}>
